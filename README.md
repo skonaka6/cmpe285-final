@@ -18,6 +18,8 @@ project/
 
 ### 1. Backend
 
+make a new folder ./server/data and move imaegs.csv and styles.csv into there (having a gitignore issue, to be fixed)
+
 ```bash
 cd server
 npm install
@@ -75,7 +77,9 @@ The **React** client loads the deck of items the user has not voted on yet, supp
 
 ## Known issues
 
-- Swipe-down to open results is a light touch gesture on the card stack; the **Results ↓** button is the reliable control.
+- Swipe-down to open results is a light touch gesture on the card stack; the 
+- data folder committing issue, requires manual import of images.csv and styles.csv
+**Results ↓** button is the reliable control.
 
 ## Demo
 
