@@ -39,6 +39,8 @@ Open **http://localhost:5173** (Vite proxies `/api` to the backend).
 
 ## Architecture
 
+![Swipe Vote architecture](documentation/architecture.png)
+
 The **Express** server owns all vote data in **SQLite** (`server/data/votes.db`). Users sign in with a **username** (no password); the server returns a **session UUID** stored in `localStorage` and sent as `Authorization: Bearer <token>`. Votes are keyed by `(user_id, item_id)` with a unique constraint and SQLite `ON CONFLICT` upsert so repeat votes update rather than double-count.
 
 The **React** client loads the deck of items the user has not voted on yet, supports pointer swipe and yes/no buttons, and offers a results screen with sort tabs (most loved, most divisive, most skipped). Results poll every 8 seconds while open.
