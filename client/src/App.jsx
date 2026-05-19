@@ -5,9 +5,11 @@ import {
   getMe,
   getResults,
   getStoredSessionId,
+  logout,
   postVote,
   setStoredSessionId,
 } from "./api/client.js";
+import AppHeader from "./components/AppHeader.jsx";
 import LoginScreen from "./components/LoginScreen.jsx";
 import ResultsView from "./components/ResultsView.jsx";
 import SwipeDeck from "./components/SwipeDeck.jsx";
@@ -20,6 +22,7 @@ export default function App() {
   const [results, setResults] = useState([]);
   const [resultsLoading, setResultsLoading] = useState(false);
   const [loginError, setLoginError] = useState("");
+  const [loggingOut, setLoggingOut] = useState(false);
 
   const refreshItems = useCallback(async () => {
     const { items: list, votedItemIds } = await getItems();
@@ -83,6 +86,21 @@ export default function App() {
     await refreshResults();
   }
 
+  async function handleLogout() {
+    setLoggingOut(true);
+    try {
+      await logout();
+    } finally {
+      setUser(null);
+      setItems([]);
+      setVotedIds(new Set());
+      setResults([]);
+      setLoginError("");
+      setLoggingOut(false);
+      setScreen("login");
+    }
+  }
+
   if (screen === "loading") {
     return (
       <main className="app-shell">
@@ -102,30 +120,38 @@ export default function App() {
   if (screen === "results") {
     return (
       <main className="app-shell results-shell">
+        {user && (
+          <AppHeader
+            username={user.username}
+            onLogout={handleLogout}
+            loggingOut={loggingOut}
+          />
+        )}
         <ResultsView
           results={results}
           loading={resultsLoading}
           onBack={() => setScreen("vote")}
           onRefresh={refreshResults}
         />
-        {user && (
-          <p className="user-badge">Signed in as {user.username}</p>
-        )}
       </main>
     );
   }
 
   return (
     <main className="app-shell vote-shell">
+      {user && (
+        <AppHeader
+          username={user.username}
+          onLogout={handleLogout}
+          loggingOut={loggingOut}
+        />
+      )}
       <SwipeDeck
         items={items}
         votedIds={votedIds}
         onVote={handleVote}
         onShowResults={openResults}
       />
-      {user && (
-        <p className="user-badge">@{user.username}</p>
-      )}
     </main>
   );
 }

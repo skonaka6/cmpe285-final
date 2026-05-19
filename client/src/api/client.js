@@ -58,8 +58,14 @@ export function postVote(itemId, vote) {
   });
 }
 
-export function logout() {
-  return request("/api/session", { method: "DELETE" }).finally(() => {
+/** Ends the server session and clears the stored token. */
+export async function logout() {
+  try {
+    await request("/api/session", { method: "DELETE" });
+  } catch (err) {
+    // Session may already be invalid; still clear local state.
+    if (err.status !== 401) throw err;
+  } finally {
     setStoredSessionId(null);
-  });
+  }
 }

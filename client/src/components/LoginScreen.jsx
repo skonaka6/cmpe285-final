@@ -14,8 +14,8 @@ export default function LoginScreen({ onLogin, error }) {
         <p className="eyebrow">Swipe Vote</p>
         <h1>Style Check</h1>
         <p className="login-sub">
-          Swipe right to approve a look, left to pass. Pick a username to save
-          your votes across sessions.
+          Swipe right to approve a look, left to pass. Your progress is saved to
+          your username — log out anytime and sign back in later to continue.
         </p>
         <form onSubmit={handleSubmit}>
           <label htmlFor="username">Username</label>
