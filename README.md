@@ -98,7 +98,7 @@ curl -s http://localhost:3000/api/results | jq '.results[0:3]'
 | # | Feature | Status |
 |---|---------|--------|
 | 7 | User identity (username session) | ✅ |
-| 8 | Undo last swipe | ❌ |
+| 8 | Previous / review past votes | ✅ |
 | 9 | Matches view | ❌ |
 | 10 | Real-time results | ✅ 8s polling on results screen |
 | 11 | Admin seed script | ✅ `npm run seed` |

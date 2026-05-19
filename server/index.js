@@ -47,7 +47,9 @@ app.post("/api/session", (req, res) => {
 app.get("/api/me", requireSession, (req, res) => {
   const votes = db
     .prepare(
-      "SELECT item_id AS itemId, vote FROM votes WHERE user_id = ? ORDER BY item_id"
+      `SELECT item_id AS itemId, vote
+       FROM votes WHERE user_id = ?
+       ORDER BY datetime(created_at) ASC, id ASC`
     )
     .all(req.user.id);
 

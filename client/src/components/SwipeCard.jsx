@@ -4,7 +4,13 @@ const THRESHOLD = 90;
 const TINT_START = 20;
 const MAX_TINT = 0.42;
 
-export default function SwipeCard({ item, onVote, onSwipeTint, disabled }) {
+export default function SwipeCard({
+  item,
+  priorVote,
+  onVote,
+  onSwipeTint,
+  disabled,
+}) {
   const cardRef = useRef(null);
   const dragRef = useRef({ active: false, startX: 0, startY: 0, x: 0, y: 0 });
   const [offset, setOffset] = useState({ x: 0, y: 0 });
@@ -91,13 +97,24 @@ export default function SwipeCard({ item, onVote, onSwipeTint, disabled }) {
     else resetTransform();
   }
 
-  const hint =
+  const dragHint =
     offset.x > 40 ? "yes" : offset.x < -40 ? "no" : null;
+  const showPriorYes = priorVote === "yes" && !dragHint;
+  const showPriorNo = priorVote === "no" && !dragHint;
 
   return (
     <article
       ref={cardRef}
-      className={`swipe-card ${exiting ? `exiting-${exiting}` : ""} ${hint ? `hint-${hint}` : ""}`}
+      className={[
+        "swipe-card",
+        exiting ? `exiting-${exiting}` : "",
+        dragHint ? `hint-${dragHint}` : "",
+        priorVote ? "swipe-card-reviewed" : "",
+        showPriorYes ? "prior-yes" : "",
+        showPriorNo ? "prior-no" : "",
+      ]
+        .filter(Boolean)
+        .join(" ")}
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}
