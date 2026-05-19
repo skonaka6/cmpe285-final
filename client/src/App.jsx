@@ -1,47 +1,131 @@
-import { useEffect, useState } from "react";
-import { getItems, getResults, postVote } from "./api/client.js";
+import { useCallback, useEffect, useState } from "react";
+import {
+  createSession,
+  getItems,
+  getMe,
+  getResults,
+  getStoredSessionId,
+  postVote,
+  setStoredSessionId,
+} from "./api/client.js";
+import LoginScreen from "./components/LoginScreen.jsx";
+import ResultsView from "./components/ResultsView.jsx";
+import SwipeDeck from "./components/SwipeDeck.jsx";
 
 export default function App() {
-  const [status, setStatus] = useState("Loading API stubs…");
+  const [screen, setScreen] = useState("loading");
+  const [user, setUser] = useState(null);
+  const [items, setItems] = useState([]);
+  const [votedIds, setVotedIds] = useState(() => new Set());
+  const [results, setResults] = useState([]);
+  const [resultsLoading, setResultsLoading] = useState(false);
+  const [loginError, setLoginError] = useState("");
+
+  const refreshItems = useCallback(async () => {
+    const { items: list, votedItemIds } = await getItems();
+    setItems(list);
+    setVotedIds(new Set(votedItemIds));
+  }, []);
+
+  const refreshResults = useCallback(async () => {
+    setResultsLoading(true);
+    try {
+      const { results: rows } = await getResults();
+      setResults(rows);
+    } finally {
+      setResultsLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    async function probeApi() {
+    async function bootstrap() {
+      const sessionId = getStoredSessionId();
+      if (!sessionId) {
+        setScreen("login");
+        return;
+      }
+
       try {
-        const [{ items }, { results }] = await Promise.all([
-          getItems(),
-          getResults(),
-        ]);
-        setStatus(
-          `API connected. ${items.length} items, ${results.length} result rows. Swipe UI coming next.`
-        );
-      } catch (err) {
-        setStatus(`API error: ${err.message}. Is the server running on :3000?`);
+        const { user: me, votes } = await getMe();
+        setUser(me);
+        setVotedIds(new Set(votes.map((v) => v.itemId)));
+        await refreshItems();
+        setScreen("vote");
+      } catch {
+        setStoredSessionId(null);
+        setScreen("login");
       }
     }
 
-    probeApi();
-  }, []);
+    bootstrap();
+  }, [refreshItems]);
 
-  async function handleTestVote() {
+  async function handleLogin(username) {
+    setLoginError("");
     try {
-      await postVote(1, "yes");
-      const { results } = await getResults();
-      const first = results.find((r) => r.itemId === 1);
-      setStatus(
-        `Test vote recorded. Item 1: ${first?.yesCount ?? 0} yes / ${first?.noCount ?? 0} no`
-      );
+      const { sessionId, user: u } = await createSession(username);
+      setStoredSessionId(sessionId);
+      setUser(u);
+      await refreshItems();
+      setScreen("vote");
     } catch (err) {
-      setStatus(`Vote failed: ${err.message}`);
+      setLoginError(err.message);
     }
   }
 
+  async function handleVote(itemId, vote) {
+    await postVote(itemId, vote);
+    setVotedIds((prev) => new Set(prev).add(itemId));
+  }
+
+  async function openResults() {
+    setScreen("results");
+    await refreshResults();
+  }
+
+  if (screen === "loading") {
+    return (
+      <main className="app-shell">
+        <p className="center-msg">Loading…</p>
+      </main>
+    );
+  }
+
+  if (screen === "login") {
+    return (
+      <main className="app-shell">
+        <LoginScreen onLogin={handleLogin} error={loginError} />
+      </main>
+    );
+  }
+
+  if (screen === "results") {
+    return (
+      <main className="app-shell results-shell">
+        <ResultsView
+          results={results}
+          loading={resultsLoading}
+          onBack={() => setScreen("vote")}
+          onRefresh={refreshResults}
+        />
+        {user && (
+          <p className="user-badge">Signed in as {user.username}</p>
+        )}
+      </main>
+    );
+  }
+
   return (
-    <main style={{ padding: "1.5rem", maxWidth: 480, margin: "0 auto" }}>
-      <h1>Swipe Vote</h1>
-      <p>{status}</p>
-      <button type="button" onClick={handleTestVote}>
-        Test POST vote (item 1 = yes)
-      </button>
+    <main className="app-shell vote-shell">
+      <SwipeDeck
+        items={items}
+        votedIds={votedIds}
+        onVote={handleVote}
+        onShowResults={openResults}
+      />
+      {user && (
+        <p className="user-badge">@{user.username}</p>
+      )}
     </main>
   );
 }
