@@ -18,9 +18,10 @@ project/
 
 ### 1. Backend
 
-make a new folder ./server/data and move imaegs.csv and styles.csv into there (having a gitignore issue, to be fixed)
+move the two csvs in ./server/data2 into ./server/data (having a gitignore issue, to be fixed) OR if there is no /data folder, rename data2
 
 ```bash
+mv ./server/data2 ./server/data
 cd server
 npm install
 npm run seed        # first time, or npm run seed:force to reset databases
