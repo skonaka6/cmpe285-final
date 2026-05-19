@@ -38,6 +38,33 @@ input {
   display: flex;
   flex-direction: column;
   position: relative;
+  isolation: isolate;
+}
+
+.app-shell > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Full-screen swipe feedback tint (vote screen only) */
+.vote-shell::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.12s ease;
+}
+
+.vote-shell[data-swipe-tint="yes"]::before {
+  background: var(--yes);
+  opacity: var(--swipe-tint-opacity, 0);
+}
+
+.vote-shell[data-swipe-tint="no"]::before {
+  background: var(--no);
+  opacity: var(--swipe-tint-opacity, 0);
 }
 
 .center-msg {

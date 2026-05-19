@@ -1,8 +1,10 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const THRESHOLD = 90;
+const TINT_START = 20;
+const MAX_TINT = 0.42;
 
-export default function SwipeCard({ item, onVote, disabled }) {
+export default function SwipeCard({ item, onVote, onSwipeTint, disabled }) {
   const cardRef = useRef(null);
   const dragRef = useRef({ active: false, startX: 0, startY: 0, x: 0, y: 0 });
   const [offset, setOffset] = useState({ x: 0, y: 0 });
@@ -15,17 +17,38 @@ export default function SwipeCard({ item, onVote, disabled }) {
     }
   }
 
+  function updateBackgroundTint(x) {
+    if (!onSwipeTint) return;
+    if (x > TINT_START) {
+      const strength = Math.min(x / THRESHOLD, 1) * MAX_TINT;
+      onSwipeTint("yes", strength);
+    } else if (x < -TINT_START) {
+      const strength = Math.min(Math.abs(x) / THRESHOLD, 1) * MAX_TINT;
+      onSwipeTint("no", strength);
+    } else {
+      onSwipeTint(null, 0);
+    }
+  }
+
+  function clearBackgroundTint() {
+    onSwipeTint?.(null, 0);
+  }
+
   function resetTransform() {
     if (cardRef.current) {
       cardRef.current.style.transform = "";
       cardRef.current.style.transition = "";
     }
     setOffset({ x: 0, y: 0 });
+    clearBackgroundTint();
   }
+
+  useEffect(() => () => clearBackgroundTint(), []);
 
   function commitVote(choice, x) {
     if (disabled || exiting) return;
     setExiting(choice);
+    onSwipeTint?.(choice, MAX_TINT);
     const direction = choice === "yes" ? 1 : -1;
     if (cardRef.current) {
       cardRef.current.style.transition = "transform 0.28s ease-out";
@@ -55,6 +78,7 @@ export default function SwipeCard({ item, onVote, disabled }) {
     dragRef.current.y = y;
     applyTransform(x, y);
     setOffset({ x, y });
+    updateBackgroundTint(x);
   }
 
   function onPointerUp() {

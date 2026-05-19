@@ -1,7 +1,13 @@
 import { useMemo, useRef, useState } from "react";
 import SwipeCard from "./SwipeCard.jsx";
 
-export default function SwipeDeck({ items, votedIds, onVote, onShowResults }) {
+export default function SwipeDeck({
+  items,
+  votedIds,
+  onVote,
+  onShowResults,
+  onSwipeTint,
+}) {
   const deck = useMemo(
     () => items.filter((item) => !votedIds.has(item.id)),
     [items, votedIds]
@@ -75,6 +81,7 @@ export default function SwipeDeck({ items, votedIds, onVote, onShowResults }) {
           key={current.id}
           item={current}
           onVote={handleVote}
+          onSwipeTint={onSwipeTint}
           disabled={busy}
         />
       </section>

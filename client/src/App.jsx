@@ -23,6 +23,13 @@ export default function App() {
   const [resultsLoading, setResultsLoading] = useState(false);
   const [loginError, setLoginError] = useState("");
   const [loggingOut, setLoggingOut] = useState(false);
+  const [swipeTint, setSwipeTint] = useState(null);
+  const [swipeTintStrength, setSwipeTintStrength] = useState(0);
+
+  function handleSwipeTint(direction, strength) {
+    setSwipeTint(direction);
+    setSwipeTintStrength(strength);
+  }
 
   const refreshItems = useCallback(async () => {
     const { items: list, votedItemIds } = await getItems();
@@ -138,7 +145,11 @@ export default function App() {
   }
 
   return (
-    <main className="app-shell vote-shell">
+    <main
+      className="app-shell vote-shell"
+      data-swipe-tint={swipeTint ?? ""}
+      style={{ "--swipe-tint-opacity": swipeTintStrength }}
+    >
       {user && (
         <AppHeader
           username={user.username}
@@ -151,6 +162,7 @@ export default function App() {
         votedIds={votedIds}
         onVote={handleVote}
         onShowResults={openResults}
+        onSwipeTint={handleSwipeTint}
       />
     </main>
   );
