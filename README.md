@@ -2,7 +2,7 @@
 
 Mobile-first web app where you swipe through **clothing looks** and vote **yes** (approve) or **no** (pass). Community results show aggregate yes/no counts across all users.
 
-**Theme:** Would you wear or buy this item? Each card shows a product photo, name, and style details from the Myntra-style dataset in `server/data/`.
+**Theme:** Would you wear or buy this item? Each card shows a product photo, name, and style details from the Myntra-style dataset in `server/data/`. Dataset pulled from Kaggle by Param Aggarwal (https://www.kaggle.com/datasets/paramaggarwal/fashion-product-images-dataset)
 
 ## Project layout
 
@@ -11,7 +11,7 @@ project/
   client/          # React + Vite frontend
   server/          # Express + SQLite API
   server/seed.js   # Seeds 100 items from styles.csv + images.csv
-  server/data/     # styles.csv, images.csv
+  server/data/     # styles.csv, images.csv, votes.db (sqlite database)
 ```
 
 ## Quick start
@@ -21,7 +21,7 @@ project/
 ```bash
 cd server
 npm install
-npm run seed        # first time, or npm run seed:force to reset
+npm run seed        # first time, or npm run seed:force to reset databases
 npm start
 ```
 
@@ -41,59 +41,28 @@ Open **http://localhost:5173** (Vite proxies `/api` to the backend).
 
 ![Swipe Vote architecture](documentation/architecture.png)
 
-The **Express** server owns all vote data in **SQLite** (`server/data/votes.db`). Users sign in with a **username** (no password); the server returns a **session UUID** stored in `localStorage` and sent as `Authorization: Bearer <token>`. Votes are keyed by `(user_id, item_id)` with a unique constraint and SQLite `ON CONFLICT` upsert so repeat votes update rather than double-count.
+The **Express** server owns all vote data in **SQLite** (`server/data/votes.db`). Users sign in with a **username** (no password). Votes are keyed by `(user_id, item_id)` with a unique constraint and SQLite `ON CONFLICT` upsert so **repeat votes update rather than double-count for idempotency**.
 
-The **React** client loads the deck of items the user has not voted on yet, supports pointer swipe and yes/no buttons, and offers a results screen with sort tabs (most loved, most divisive, most skipped). Results poll every 8 seconds while open.
+The **React** client loads the deck of items the user has not voted on yet, supports pointer swipe and yes/no buttons, and offers a results screen with sort tabs (most loved, most divisive, most skipped). Results poll every 8 seconds while open to meet real-time updating stretch goal.
 
-**Why SQLite:** Zero-config, single file, fine for local demo and class scale; `better-sqlite3` gives synchronous queries without an ORM.
-
-**Dedup:** One vote per user per item. `UNIQUE(user_id, item_id)` on `votes`; `POST /api/votes` upserts on conflict.
+**Why SQLite:** Zero-config, single file, fine for local demo and class scale; `better-sqlite3` gives synchronous queries without an ORM. Using SQLite over a dedicated MySQL server also cuts down on installation and setup requirements.
 
 **Images:** Loaded from `images.csv` (Myntra asset URLs linked by style id). Requires network access to load photos in the browser.
 
-## API
-
-| Method | Path | Auth | Description |
-|--------|------|------|-------------|
-| GET | `/api/health` | — | Health check |
-| POST | `/api/session` | — | `{ username }` → `{ sessionId, user }` |
-| GET | `/api/me` | Bearer | Current user + their votes |
-| DELETE | `/api/session` | Bearer | Log out |
-| GET | `/api/items` | optional | All items + `votedItemIds` if signed in |
-| GET | `/api/results` | — | Aggregate yes/no per item |
-| POST | `/api/votes` | Bearer | `{ itemId, vote: "yes"\|"no" }` |
-
-### curl examples
-
-```bash
-# Create session
-curl -s -X POST http://localhost:3000/api/session \
-  -H "Content-Type: application/json" \
-  -d '{"username":"demo"}' | jq
-
-# Vote (use sessionId from above)
-curl -s -X POST http://localhost:3000/api/votes \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_SESSION_ID" \
-  -d '{"itemId":1,"vote":"yes"}'
-
-curl -s http://localhost:3000/api/results | jq '.results[0:3]'
-```
-
 ## Requirements checklist
 
-### Core (3.1)
+### Core
 
 | # | Requirement | Status |
 |---|-------------|--------|
 | 1 | Voting theme documented | ✅ Clothing / style approval |
 | 2 | 100+ items with image + label | ✅ 100 from CSV (`npm run seed`) |
-| 3 | Swipe UI yes/no + buttons + feedback + next card | ✅ |
+| 3 | Swipe UI yes/no  | ✅ |
 | 4 | Results view + sort/filter | ✅ 3 sort modes |
 | 5 | Server persistence | ✅ SQLite |
 | 6 | End-of-deck state | ✅ |
 
-### Stretch (3.2)
+### Stretch
 
 | # | Feature | Status |
 |---|---------|--------|
@@ -106,8 +75,12 @@ curl -s http://localhost:3000/api/results | jq '.results[0:3]'
 
 ## Known issues
 
-- Placeholder images require network access to picsum.photos.
 - Swipe-down to open results is a light touch gesture on the card stack; the **Results ↓** button is the reliable control.
-- Re-seeding with `--force` clears all votes.
 
-See **AI_NOTES.md** for the AI collaboration write-up template.
+## Demo
+
+https://youtu.be/EFd6mr8GBqY
+
+## AI Usage
+
+See **AI_NOTES.md** for AI usage write-up
