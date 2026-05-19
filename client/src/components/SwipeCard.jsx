@@ -91,7 +91,7 @@ export default function SwipeCard({ item, onVote, disabled }) {
         <h2>{item.title}</h2>
         <p>{item.description}</p>
       </div>
-      <span className="stamp stamp-yes">ADOPT</span>
+      <span className="stamp stamp-yes">YES</span>
       <span className="stamp stamp-no">PASS</span>
     </article>
   );

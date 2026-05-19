@@ -12,9 +12,9 @@ export default function LoginScreen({ onLogin, error }) {
     <div className="login-screen">
       <div className="login-card">
         <p className="eyebrow">Swipe Vote</p>
-        <h1>Adoptable Pets</h1>
+        <h1>Style Check</h1>
         <p className="login-sub">
-          Swipe right if you would adopt, left if not. Pick a username to save
+          Swipe right to approve a look, left to pass. Pick a username to save
           your votes across sessions.
         </p>
         <form onSubmit={handleSubmit}>
@@ -23,7 +23,7 @@ export default function LoginScreen({ onLogin, error }) {
             id="username"
             type="text"
             autoComplete="username"
-            placeholder="e.g. petlover42"
+            placeholder="e.g. fashionista42"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             maxLength={24}

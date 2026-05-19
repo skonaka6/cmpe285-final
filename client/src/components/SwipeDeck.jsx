@@ -39,7 +39,7 @@ export default function SwipeDeck({ items, votedIds, onVote, onShowResults }) {
     return (
       <section className="deck-empty">
         <p className="eyebrow">All done</p>
-        <h2>You&apos;ve voted on every pet!</h2>
+        <h2>You&apos;ve rated every look!</h2>
         <p>See how everyone else voted on the community results.</p>
         <button type="button" className="btn-primary" onClick={onShowResults}>
           View results
@@ -94,7 +94,7 @@ export default function SwipeDeck({ items, votedIds, onVote, onShowResults }) {
           className="vote-btn vote-yes"
           disabled={busy}
           onClick={() => handleVote("yes")}
-          aria-label="Adopt"
+          aria-label="Approve"
         >
           ♥
         </button>

@@ -1,8 +1,8 @@
-# Swipe Vote — Adoptable Pets
+# Swipe Vote — Style Check
 
-Mobile-first web app where you swipe through **adoptable pets** and vote **yes** (would adopt) or **no** (pass). Community results show aggregate yes/no counts across all users.
+Mobile-first web app where you swipe through **clothing looks** and vote **yes** (approve) or **no** (pass). Community results show aggregate yes/no counts across all users.
 
-**Theme:** Would you adopt this pet? Each card shows a photo, name, breed, and personality blurb.
+**Theme:** Would you wear or buy this item? Each card shows a product photo, name, and style details from the Myntra-style dataset in `server/data/`.
 
 ## Project layout
 
@@ -10,7 +10,8 @@ Mobile-first web app where you swipe through **adoptable pets** and vote **yes**
 project/
   client/          # React + Vite frontend
   server/          # Express + SQLite API
-  server/seed.js   # Seeds 120 pets (run after install)
+  server/seed.js   # Seeds 100 items from styles.csv + images.csv
+  server/data/     # styles.csv, images.csv
 ```
 
 ## Quick start
@@ -46,7 +47,7 @@ The **React** client loads the deck of items the user has not voted on yet, supp
 
 **Dedup:** One vote per user per item. `UNIQUE(user_id, item_id)` on `votes`; `POST /api/votes` upserts on conflict.
 
-**Images:** [picsum.photos](https://picsum.photos) placeholder photos with stable seeds (`adopt-pet-{id}`). Replace with real shelter photos in a production version.
+**Images:** Loaded from `images.csv` (Myntra asset URLs linked by style id). Requires network access to load photos in the browser.
 
 ## API
 
@@ -83,8 +84,8 @@ curl -s http://localhost:3000/api/results | jq '.results[0:3]'
 
 | # | Requirement | Status |
 |---|-------------|--------|
-| 1 | Voting theme documented | ✅ Adoptable pets |
-| 2 | 100+ items with image + label | ✅ 120 seeded (`npm run seed`) |
+| 1 | Voting theme documented | ✅ Clothing / style approval |
+| 2 | 100+ items with image + label | ✅ 100 from CSV (`npm run seed`) |
 | 3 | Swipe UI yes/no + buttons + feedback + next card | ✅ |
 | 4 | Results view + sort/filter | ✅ 3 sort modes |
 | 5 | Server persistence | ✅ SQLite |

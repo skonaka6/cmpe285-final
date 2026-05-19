@@ -81,7 +81,7 @@ export default function ResultsView({ results, loading, onBack, onRefresh }) {
                   />
                 </div>
                 <p className="result-counts">
-                  <span className="yes-label">{row.yesCount} adopt</span>
+                  <span className="yes-label">{row.yesCount} yes</span>
                   <span className="no-label">{row.noCount} pass</span>
                   <span className="muted"> · {total} votes</span>
                 </p>
